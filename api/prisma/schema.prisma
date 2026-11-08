@@ -1,0 +1,109 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ======================================
+// USER ROLES
+// ======================================
+
+enum Role {
+  PATRON
+  LIBRARIAN
+}
+
+// ======================================
+// USER MODEL
+// ======================================
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  firstName String
+  lastName  String
+  email     String   @unique
+  password  String
+  role      Role     @default(PATRON)
+
+  reviews   Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([role])
+  @@map("users")
+}
+
+// ======================================
+// GENRE MODEL
+// ======================================
+
+model Genre {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  description String?
+
+  books       Book[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("genres")
+}
+
+// ======================================
+// BOOK MODEL
+// ======================================
+
+model Book {
+  id              String   @id @default(uuid()) @db.Uuid
+  isbn            String   @unique
+  title           String
+  author          String
+  description     String?
+  publishedYear   Int?
+
+  totalCopies     Int      @default(1)
+  availableCopies Int      @default(1)
+
+  genreId         String   @db.Uuid
+
+  genre           Genre    @relation(fields: [genreId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  reviews         Review[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([genreId])
+  @@index([title])
+  @@index([author])
+  @@map("books")
+}
+
+// ======================================
+// REVIEW MODEL
+// ======================================
+
+model Review {
+  id        String   @id @default(uuid()) @db.Uuid
+  bookId    String   @db.Uuid
+  userId    String   @db.Uuid
+
+  rating    Int
+  comment   String?
+
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([bookId, userId])
+  @@index([userId])
+  @@map("reviews")
+}
