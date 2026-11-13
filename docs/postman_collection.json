@@ -1,0 +1,170 @@
+{
+  "info": {
+    "_postman_id": "4d6799bb-f2a8-4a47-aef9-8c4de0b33db7",
+    "name": "Library Management System API",
+    "description": "Health, authentication, user profile, book catalog, and genre CRUD endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "token", "value": "" },
+    { "key": "genreId", "value": "" },
+    { "key": "bookId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Get API status",
+          "request": { "method": "GET", "url": "{{baseUrl}}/" }
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register patron",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Alex\",\n  \"lastName\": \"Reader\",\n  \"email\": \"alex@example.com\",\n  \"password\": \"library-pass-123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alex@example.com\",\n  \"password\": \"library-pass-123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get authenticated profile",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "url": "{{baseUrl}}/users/profile"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Genres",
+      "item": [
+        {
+          "name": "Create genre",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Science Fiction\",\n  \"description\": \"Futuristic technology and space.\"\n}"
+            },
+            "url": "{{baseUrl}}/genres"
+          }
+        },
+        {
+          "name": "List genres",
+          "request": { "method": "GET", "url": "{{baseUrl}}/genres" }
+        },
+        {
+          "name": "Get genre",
+          "request": { "method": "GET", "url": "{{baseUrl}}/genres/{{genreId}}" }
+        },
+        {
+          "name": "Update genre",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated genre description.\"\n}"
+            },
+            "url": "{{baseUrl}}/genres/{{genreId}}"
+          }
+        },
+        {
+          "name": "Delete genre",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/genres/{{genreId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Books",
+      "item": [
+        {
+          "name": "List books (filter, search, paginate)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/books?genreId={{genreId}}&search=orwell&page=1&limit=10"
+          }
+        },
+        {
+          "name": "Get book",
+          "request": { "method": "GET", "url": "{{baseUrl}}/books/{{bookId}}" }
+        },
+        {
+          "name": "Create book (Librarian)",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"1984\",\n  \"author\": \"George Orwell\",\n  \"isbn\": \"9780451524935\",\n  \"totalCopies\": 5,\n  \"genreId\": \"{{genreId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/books"
+          }
+        },
+        {
+          "name": "Update book (Librarian)",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"totalCopies\": 8\n}"
+            },
+            "url": "{{baseUrl}}/books/{{bookId}}"
+          }
+        },
+        {
+          "name": "Delete book (Librarian)",
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "url": "{{baseUrl}}/books/{{bookId}}"
+          }
+        }
+      ]
+    }
+  ]
+}

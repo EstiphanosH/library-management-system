@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 
 import { PrismaClient } from '@prisma/client';
+import { validateDatabaseUrl } from './database-url.js';
 
 @Injectable()
 export class PrismaService
@@ -13,6 +14,7 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   async onModuleInit(): Promise<void> {
+    validateDatabaseUrl(process.env.DATABASE_URL);
     await this.$connect();
     console.log('Database connected successfully.');
   }

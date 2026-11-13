@@ -269,7 +269,16 @@ npm install
 
 ### Step 3: Configure environment variables
 
-Create your `.env` file and configure `DATABASE_URL`.
+Create `api/.env` (see [`api/.env.example`](./api/.env.example)) and configure
+`DATABASE_URL` plus a private `JWT_SECRET` value of at least 32 bytes. Generate
+a secret from the `api` directory with:
+
+```bash
+node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
+```
+
+Paste the generated value into `JWT_SECRET` in `api/.env`. The API refuses to
+start its authentication module if the secret is missing or too short.
 
 ### Step 4: Validate the Prisma schema
 
@@ -331,7 +340,23 @@ http://localhost:3000
 
 ```
 
-## 8. Database Seeding
+## 8. Backend API
+
+- `POST /auth/register` creates a PATRON account and returns a JWT.
+- `POST /auth/login` authenticates a user and returns a JWT; the route is
+  limited to five attempts per minute per client.
+- `GET /users/profile` returns the authenticated user's profile.
+- `GET /genres`, `GET /genres/:id`, `POST /genres`, `PATCH /genres/:id`, and
+  `DELETE /genres/:id` provide genre CRUD.
+- `GET /books` supports `genreId`, `search`, `page`, and `limit` query
+  parameters. Search matches book titles and authors.
+- `GET /books/:id`, `POST /books`, `PATCH /books/:id`, and
+  `DELETE /books/:id` provide book CRUD. Mutations require a LIBRARIAN JWT.
+
+Import [`docs/postman_collection.json`](./docs/postman_collection.json) into
+Postman for example requests for each endpoint.
+
+## 9. Database Seeding
 
 The seed script is located at:
 
@@ -394,7 +419,7 @@ Expected results:
 - Genres: 4
 - Books: 16
 
-## 9. Prisma Service Integration
+## 10. Prisma Service Integration
 
 The Prisma database integration is implemented in:
 
@@ -414,7 +439,7 @@ The service is registered through `PrismaModule`, which is imported into the roo
 
 This provides centralized and reusable database access throughout the NestJS application.
 
-## 10. Database Migrations
+## 11. Database Migrations
 
 Prisma Migrate is used to manage database schema changes.
 
@@ -456,7 +481,7 @@ api/prisma/migrations/
 
 These migration files should be committed to version control so that other developers can reproduce the database schema.
 
-## 11. Data Integrity and Design Considerations
+## 12. Data Integrity and Design Considerations
 
 The following database constraints are implemented:
 
@@ -472,7 +497,7 @@ The following database constraints are implemented:
 
 The Book model also tracks total and available copies to support future borrowing and inventory functionality.
 
-## 12. First Deliverable Summary
+## 13. First Deliverable Summary
 
 The first development milestone focuses on designing and implementing the library's book catalog data layer.
 
@@ -491,20 +516,15 @@ Completed functionality:
 - Environment configuration using DATABASE_URL.
 - Schema documentation and modeling decisions.
 
-## 13. Future Development
+## 14. Future Development
 
 The next development milestones will extend the system with:
 
-1. User authentication and registration.
-2. JWT-based authentication.
-3. Role-based access control.
-4. Book and genre CRUD APIs.
-5. Book search, filtering, and pagination.
-6. Borrowing and returning books.
-7. Loan tracking and due dates.
-8. Review and rating APIs.
-9. Automated testing.
-10. API documentation using Swagger.
+1. Borrowing and returning books.
+2. Loan tracking and due dates.
+3. Review and rating APIs.
+4. Expanded automated testing.
+5. API documentation using Swagger.
 
 ---
 
