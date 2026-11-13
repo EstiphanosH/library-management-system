@@ -310,6 +310,8 @@ npx prisma migrate dev
 ```
 
 This applies the existing migrations and updates the database schema.
+The genre-slug migration adds a required unique slug and backfills existing
+genres from their names before seed data is applied.
 
 ### Step 7: Seed the database
 
@@ -347,7 +349,8 @@ http://localhost:3000
   limited to five attempts per minute per client.
 - `GET /users/profile` returns the authenticated user's profile.
 - `GET /genres`, `GET /genres/:id`, `POST /genres`, `PATCH /genres/:id`, and
-  `DELETE /genres/:id` provide genre CRUD.
+  `DELETE /genres/:id` provide genre CRUD. Genre mutations require a
+  LIBRARIAN JWT.
 - `GET /books` supports `genreId`, `search`, `page`, and `limit` query
   parameters. Search matches book titles and authors.
 - `GET /books/:id`, `POST /books`, `PATCH /books/:id`, and
@@ -367,16 +370,19 @@ api/prisma/seed.ts
 
 ```
 
-It inserts at least four genres and sixteen books distributed across those genres.
+It upserts Fantasy, Science Fiction, Mystery, and Biography, then seeds 16
+books distributed across those genres. Genre slugs are generated from names;
+new seed books receive descriptions and three total/available copies. Reruns
+preserve existing inventory counts while refreshing sample book details.
 
 ### Seeded Genres
 
 | Genre           | Number of Books |
 | --------------- | --------------- |
-| Science Fiction | 4               |
 | Fantasy         | 4               |
-| Programming     | 4               |
-| History         | 4               |
+| Science Fiction | 4               |
+| Mystery         | 4               |
+| Biography       | 4               |
 | **Total**       | **16**          |
 
 The seed script uses Prisma `upsert` operations to avoid creating duplicate genres and books when executed repeatedly.

@@ -26,7 +26,7 @@ export class CreateBookDto {
   isbn!: string;
 
   @IsInt()
-  @Min(0)
+  @Min(1)
   totalCopies!: number;
 
   @IsUUID()

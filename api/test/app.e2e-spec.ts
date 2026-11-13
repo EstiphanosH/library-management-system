@@ -17,7 +17,12 @@ const librarianId = 'd1b2c3d4-e5f6-4789-8abc-123456789012';
 const password = 'library-pass-123';
 const passwordHash = bcrypt.hashSync(password, 4);
 
-const genre = { id: genreId, name: 'Fantasy', description: null };
+const genre = {
+  id: genreId,
+  name: 'Fantasy',
+  slug: 'fantasy',
+  description: null,
+};
 const book = {
   id: bookId,
   title: 'The Hobbit',
@@ -93,7 +98,11 @@ describe('Library API (e2e)', () => {
     prismaMock.genre.create.mockResolvedValue(genre);
     prismaMock.genre.findMany.mockResolvedValue([genre]);
     prismaMock.genre.findUnique.mockResolvedValue(genre);
-    prismaMock.genre.update.mockResolvedValue({ ...genre, name: 'Updated' });
+    prismaMock.genre.update.mockResolvedValue({
+      ...genre,
+      name: 'Updated',
+      slug: 'updated',
+    });
     prismaMock.genre.delete.mockResolvedValue(genre);
     prismaMock.book.create.mockResolvedValue(book);
     prismaMock.book.findMany.mockResolvedValue([book]);
@@ -129,32 +138,89 @@ describe('Library API (e2e)', () => {
   });
 
   it('provides full genre CRUD and validates create/update DTOs', async () => {
-    await request(app!.getHttpServer()).get('/genres').expect(200, [genre]);
-    await request(app!.getHttpServer())
+    const server = app!.getHttpServer();
+    await request(server).get('/genres').expect(200, [genre]);
+    await request(server)
       .post('/genres')
       .send({ name: 'Fantasy' })
-      .expect(201, genre);
-    await request(app!.getHttpServer())
-      .get(`/genres/${genreId}`)
-      .expect(200, genre);
-    await request(app!.getHttpServer())
+      .expect(401);
+    await request(server)
       .patch(`/genres/${genreId}`)
       .send({ name: 'Updated' })
-      .expect(200, { ...genre, name: 'Updated' });
-    await request(app!.getHttpServer())
-      .delete(`/genres/${genreId}`)
-      .expect(200, genre);
+      .expect(401);
+    await request(server).delete(`/genres/${genreId}`).expect(401);
+
+    const patronLogin = await request(server)
+      .post('/auth/login')
+      .send({ email: patron.email, password })
+      .expect(200);
+    const patronAuth = `Bearer ${patronLogin.body.accessToken}`;
     await request(app!.getHttpServer())
       .post('/genres')
+      .set('Authorization', patronAuth)
+      .send({ name: 'Fantasy' })
+      .expect(403);
+    await request(server)
+      .patch(`/genres/${genreId}`)
+      .set('Authorization', patronAuth)
+      .send({ name: 'Updated' })
+      .expect(403);
+    await request(server)
+      .delete(`/genres/${genreId}`)
+      .set('Authorization', patronAuth)
+      .expect(403);
+
+    const librarianLogin = await request(server)
+      .post('/auth/login')
+      .send({ email: librarian.email, password })
+      .expect(200);
+    const librarianAuth = `Bearer ${librarianLogin.body.accessToken}`;
+    await request(server)
+      .post('/genres')
+      .set('Authorization', librarianAuth)
+      .send({ name: 'Fantasy' })
+      .expect(201, genre);
+    await request(server)
+      .get(`/genres/${genreId}`)
+      .expect(200, genre);
+    await request(server)
+      .patch(`/genres/${genreId}`)
+      .set('Authorization', librarianAuth)
+      .send({ name: 'Updated' })
+      .expect(200, { ...genre, name: 'Updated', slug: 'updated' });
+    expect(prismaMock.genre.create).toHaveBeenCalledWith({
+      data: {
+        name: 'Fantasy',
+        slug: 'fantasy',
+      },
+    });
+    expect(prismaMock.genre.update).toHaveBeenCalledWith({
+      where: { id: genreId },
+      data: { name: 'Updated', slug: 'updated' },
+    });
+    await request(server)
+      .delete(`/genres/${genreId}`)
+      .set('Authorization', librarianAuth)
+      .expect(200, genre);
+    await request(server)
+      .post('/genres')
+      .set('Authorization', librarianAuth)
       .send({ name: 123 })
       .expect(400);
-    await request(app!.getHttpServer())
+    await request(server)
       .patch(`/genres/${genreId}`)
+      .set('Authorization', librarianAuth)
       .send({ description: 123 })
       .expect(400);
-    await request(app!.getHttpServer())
+    await request(server)
       .patch(`/genres/${genreId}`)
+      .set('Authorization', librarianAuth)
       .send({ name: null })
+      .expect(400);
+    await request(server)
+      .post('/genres')
+      .set('Authorization', librarianAuth)
+      .send({ name: '🎭' })
       .expect(400);
   });
 
@@ -267,6 +333,7 @@ describe('Library API (e2e)', () => {
       { author: 123 },
       { isbn: 123 },
       { totalCopies: 'many' },
+      { totalCopies: 0 },
       { genreId: 'not-a-uuid' },
     ]) {
       await request(server)
