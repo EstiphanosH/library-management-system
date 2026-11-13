@@ -19,36 +19,69 @@ This project provides the foundation for managing a library's book catalog, genr
 
 ## 2. Project Structure
 
-text
-
-```
+```text
 library-management-system/
-│
+├── README.md
+├── docs/
+│   └── postman_collection.json
 ├── api/
+│   ├── .env
+│   ├── .env.example
+│   ├── .gitattributes
+│   ├── .gitignore
+│   ├── .oxlintrc.json
+│   ├── .prettierrc
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── prisma.config.ts
 │   ├── prisma/
 │   │   ├── migrations/
 │   │   ├── schema.prisma
 │   │   └── seed.ts
-│   │
 │   ├── src/
-│   │   ├── prisma/
-│   │   │   ├── prisma.module.ts
-│   │   │   └── prisma.service.ts
-│   │   │
-│   │   ├── app.controller.ts
 │   │   ├── app.controller.spec.ts
+│   │   ├── app.controller.ts
 │   │   ├── app.module.ts
 │   │   ├── app.service.ts
-│   │   └── main.ts
-│   │
-│   ├── .env
-│   ├── .env.example
-│   ├── package.json
-│   ├── prisma.config.ts
-│   └── tsconfig.json
-│
-└── README.md
-
+│   │   ├── main.ts
+│   │   ├── auth/
+│   │   │   ├── dto/
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── auth.module.ts
+│   │   │   ├── auth.service.ts
+│   │   │   ├── jwt-auth.guard.ts
+│   │   │   ├── jwt-payload.interface.ts
+│   │   │   ├── jwt-secret.spec.ts
+│   │   │   ├── jwt-secret.ts
+│   │   │   ├── jwt.strategy.ts
+│   │   │   ├── roles.decorator.ts
+│   │   │   └── roles.guard.ts
+│   │   ├── books/
+│   │   │   ├── dto/
+│   │   │   ├── books.controller.ts
+│   │   │   ├── books.module.ts
+│   │   │   └── books.service.ts
+│   │   ├── genres/
+│   │   │   ├── dto/
+│   │   │   ├── genres.controller.ts
+│   │   │   ├── genres.module.ts
+│   │   │   ├── genres.service.ts
+│   │   │   ├── slugify.spec.ts
+│   │   │   └── slugify.ts
+│   │   ├── prisma/
+│   │   │   ├── database-url.spec.ts
+│   │   │   ├── database-url.ts
+│   │   │   ├── prisma.module.ts
+│   │   │   └── prisma.service.ts
+│   │   └── users/
+│   │       ├── users.controller.ts
+│   │       └── users.module.ts
+│   ├── test/
+│   ├── tsconfig.build.json
+│   ├── tsconfig.json
+│   ├── vitest.config.ts
+│   └── vitest.config.e2e.ts
+└── .gitignore
 ```
 
 ## 3. Database Schema
